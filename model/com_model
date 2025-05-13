@@ -1,0 +1,66 @@
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, f1_score, classification_report, confusion_matrix
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# 모델 리스트
+models = {
+    "SVM (RBF)": SVC(kernel="rbf", C=1.0, gamma="scale"),
+    "Random Forest": RandomForestClassifier(n_estimators=100),
+    "Logistic Regression": LogisticRegression(max_iter=1000),
+    "KNN (k=5)": KNeighborsClassifier(n_neighbors=5),
+    "Gradient Boosting": GradientBoostingClassifier()
+}
+
+def evaluate_models(X, y):
+    # ✅ NaN 처리: 0으로 대체
+    df_X = pd.DataFrame(X).fillna(0)
+    X_clean = df_X.values
+
+    # 정규화
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X_clean)
+
+    # train/test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_scaled, y, test_size=0.3, stratify=y, random_state=42
+    )
+
+    results = []
+
+    for name, model in models.items():
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+
+        acc = accuracy_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred, average='weighted')
+
+        print(f"\n=== {name} ===")
+        print(classification_report(y_test, y_pred))
+
+        cm = confusion_matrix(y_test, y_pred)
+        plt.figure(figsize=(4, 3))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                    xticklabels=["hands_up", "wave_hands"],
+                    yticklabels=["hands_up", "wave_hands"])
+        plt.title(f"{name} - Confusion Matrix")
+        plt.xlabel("Predicted")
+        plt.ylabel("True")
+        plt.show()
+
+        results.append({"Model": name, "Accuracy": acc, "F1 Score": f1})
+
+    result_df = pd.DataFrame(results).sort_values(by="F1 Score", ascending=False)
+    print("\n📊 모델 성능 비교:")
+    display(result_df)
+
+# 🔧 실행 예시
+X, y = load_dataset_with_sliding_window(base_path="/content/drive/MyDrive/Colab Notebooks/")
+evaluate_models(X, y)  # ✅ 모델 비교 실행
+
