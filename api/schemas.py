@@ -1,10 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import List
-from datetime import datetime
 
-class GesturePredictionRequest(BaseModel):
-    device_id: str = Field(..., example="bedroom_01")
-    timestamp: datetime = Field(..., example="2025-05-09T10:00:00")
-    gesture: str = Field(..., example="hand_up")
-    prev_action: str = Field(..., example="still")
-    csi: List[float] = Field(..., min_items=30, max_items=30)
+class CsiSequenceRequest(BaseModel):
+    sequence: List[List[str]]  # 복소수 문자열 리스트 (T, 64)
+
+class PredictResponse(BaseModel):
+    gesture: str
+    confidence: float

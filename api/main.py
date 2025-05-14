@@ -1,17 +1,18 @@
-from fastapi import FastAPI
-from schemas import GesturePredictionRequest
-from preprocessing import preprocess_input
-from model.loader import load_model
-from model.predictor import predict
+from fastapi import FastAPI, HTTPException
+from schemas import CsiSequenceRequest
+from preprocessing import predict_from_sequence
 
 app = FastAPI()
-model = load_model()
+
+@app.get("/")
+def health_check():
+    return {"status": "OK"}
 
 @app.post("/predict")
-def predict_intent(data: GesturePredictionRequest):
-    features = preprocess_input(data)
-    intent, confidence = predict(model, features)
-    return {
-        "predicted_intent": intent,
-        "confidence": confidence
-    }
+def predict_sequence(req: CsiSequenceRequest):
+    try:
+        result = predict_from_sequence(req.sequence)
+        return result
+    except Exception as e:
+        print(f"[예외 발생] {e}")
+        raise HTTPException(status_code=400, detail=str(e))
