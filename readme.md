@@ -73,7 +73,7 @@
 
 ## API 서버 사용 방법
 
-### 로컬 실행
+1. 로컬 실행
 
 ```bash
 cd api/
@@ -95,7 +95,7 @@ POST /predict
 Content-Type: application/json
 
 {
-  "features": [0.12, 0.34, ..., 0.87]
+  "features": [0.12, 0.34, ..., ]
 }
 ```
 
